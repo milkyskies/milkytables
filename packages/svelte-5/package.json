@@ -1,6 +1,6 @@
 {
   "name": "milkytables-svelte-5",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "author": "milkyskies",
   "keywords": [
     "tables",
@@ -11,6 +11,8 @@
   "description": "TanStack table doesn't support Svelte 5 yet so I made my own.",
   "type": "module",
   "types": "dist/index.d.ts",
+  "module": "dist/bundle.cjs.js",
+  "main": "dist/bundle.cjs.js",
   "scripts": {
     "build": "rollup -c"
   },
