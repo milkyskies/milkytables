@@ -1,0 +1,25 @@
+{
+  "name": "milkytables",
+  "version": "0.1.4",
+  "description": "A library for creating and manipulating tables.",
+  "type": "module",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "rollup -c"
+  },
+  "keywords": [
+    "tables",
+    "table"
+  ],
+  "author": "milkyskies",
+  "license": "ISC",
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^11.1.6",
+    "rollup": "^4.17.1",
+    "tslib": "^2.6.2",
+    "typescript": "^5.4.5",
+    "zod": "^3.23.5"
+  }
+}
