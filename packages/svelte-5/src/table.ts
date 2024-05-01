@@ -1,5 +1,4 @@
-import { z } from "zod";
-import type { Row } from "milkytables";
+import { type Row, type RowData } from "./row.js";
 import type { ComponentType, SvelteComponent } from "svelte";
 
 type TableColumn<RowDataType> = {
@@ -12,64 +11,54 @@ export type TableHeaders<RowDataType> = {
   [Property in keyof RowDataType]: string;
 };
 
-export class Table<SchemaType extends z.ZodType<any, any>> {
-  private readonly rows: Row<z.infer<SchemaType>>[];
-  private readonly columns: TableColumn<z.infer<SchemaType>>[];
-  private readonly schema: SchemaType;
+export class Table<RowDataType extends RowData> {
+  private readonly rows: Row<RowDataType>[];
+  private readonly columns: TableColumn<RowDataType>[];
 
   private constructor(
-    schema: SchemaType,
-    rows: Row<z.infer<SchemaType>>[] = [],
-    columns: TableColumn<z.infer<SchemaType>>[] = []
+    rows: Row<RowDataType>[] = [],
+    columns: TableColumn<RowDataType>[] = []
   ) {
-    this.schema = schema;
     this.rows = rows;
     this.columns = columns;
   }
 
-  public static create<SchemaType extends z.ZodType<any, any>>({
-    schema,
+  public static create<RowDataType extends RowData>({
     columns = [],
     rows = [],
   }: {
-    schema: SchemaType;
-    columns?: TableColumn<z.infer<SchemaType>>[];
-    rows?: z.infer<SchemaType>[];
-  }): Table<SchemaType> {
+    columns?: TableColumn<RowDataType>[];
+    rows?: RowDataType[];
+  }): Table<RowDataType> {
     const validatedRows = rows.map((rowData) => {
-      const parsedData = schema.parse(rowData);
-
-      return { id: Math.random(), value: parsedData };
+      return { id: Math.random(), value: rowData };
     });
 
-    return new Table<SchemaType>(schema, validatedRows, columns);
+    return new Table<RowDataType>(validatedRows, columns);
   }
 
-  public add(rowData: z.infer<SchemaType>): Table<SchemaType> {
-    const parsedData = this.schema.parse(rowData);
-
-    const newRow = { id: this.getNewId(this.rows), value: parsedData };
+  public add(rowData: RowDataType): Table<RowDataType> {
+    const newRow = { id: this.getNewId(this.rows), value: rowData };
     const newRows = [...this.rows, newRow];
 
-    return new Table<SchemaType>(this.schema, newRows, this.columns);
+    return new Table<RowDataType>(newRows, this.columns);
   }
 
-  public update(id: number, newValue: z.infer<SchemaType>): Table<SchemaType> {
-    const parsedNewValue = this.schema.parse(newValue);
+  public update(id: number, newValue: RowDataType): Table<RowDataType> {
     const newRows = this.rows.map((row) =>
-      row.id === id ? { ...row, value: parsedNewValue } : row
+      row.id === id ? { ...row, value: newValue } : row
     );
 
-    return new Table<SchemaType>(this.schema, newRows, this.columns);
+    return new Table<RowDataType>(newRows, this.columns);
   }
 
-  public delete(id: number): Table<SchemaType> {
+  public delete(id: number): Table<RowDataType> {
     const newRows = this.rows.filter((row) => row.id !== id);
 
-    return new Table<SchemaType>(this.schema, newRows, this.columns);
+    return new Table<RowDataType>(newRows, this.columns);
   }
 
-  public copy(id: number): Table<SchemaType> {
+  public copy(id: number): Table<RowDataType> {
     const rowToCopy = this.rows.find((row) => row.id === id);
 
     if (!rowToCopy) throw new Error("Row not found");
@@ -77,23 +66,23 @@ export class Table<SchemaType extends z.ZodType<any, any>> {
     const newRow = { ...rowToCopy, id: this.getNewId(this.rows) };
     const newRows = [...this.rows, newRow];
 
-    return new Table<SchemaType>(this.schema, newRows, this.columns);
+    return new Table<RowDataType>(newRows, this.columns);
   }
 
-  public clearAll(): Table<SchemaType> {
-    return new Table<SchemaType>(this.schema, [], this.columns);
+  public clearAll(): Table<RowDataType> {
+    return new Table<RowDataType>([], this.columns);
   }
 
-  private getNewId(rows: Row<z.infer<SchemaType>>[]): number {
+  private getNewId(rows: Row<RowDataType>[]): number {
     return rows.length > 0 ? Math.max(...rows.map((row) => row.id)) + 1 : 0;
   }
 
-  public getRows<Keys extends keyof z.infer<SchemaType>>() {
+  public getRows<Keys extends keyof RowDataType>() {
     type RowsType = {
       [Property in Keys]: {
-        value: z.infer<SchemaType>[Property];
+        value: RowDataType[Property];
         cellLayout?: ComponentType<
-          SvelteComponent<{ cellData: { data: z.infer<SchemaType> } }>
+          SvelteComponent<{ cellData: { data: RowDataType } }>
         >;
       };
     }[];
@@ -101,18 +90,18 @@ export class Table<SchemaType extends z.ZodType<any, any>> {
     const rows: RowsType = this.rows.map((row) => {
       const rowData: {
         [Property in Keys]: {
-          value: z.infer<SchemaType>[Property];
+          value: RowDataType[Property];
           cellLayout?: ComponentType<
-            SvelteComponent<{ cellData: { data: z.infer<SchemaType> } }>
+            SvelteComponent<{ cellData: { data: RowDataType } }>
           >;
         };
       } = {} as any;
 
       this.columns.forEach((column) => {
         rowData[column.key as Keys] = {
-          value: row.value[column.key],
+          value: row.value[column.key as Keys],
           cellLayout: column.cellLayout,
-        };
+        } as any; // Using 'as any' to bypass the strict type checking
       });
 
       return rowData;
@@ -121,20 +110,20 @@ export class Table<SchemaType extends z.ZodType<any, any>> {
     return rows;
   }
 
-  public getHeaderLabels<Keys extends keyof z.infer<SchemaType>>() {
-    const headers: TableHeaders<z.infer<SchemaType>> = this.columns.reduce(
+  public getHeaderLabels<Keys extends keyof RowDataType>() {
+    const headers: TableHeaders<RowDataType> = this.columns.reduce(
       (acc, column) => {
         acc[column.key as Keys] = column.label;
 
         return acc;
       },
-      {} as TableHeaders<z.infer<SchemaType>>
+      {} as TableHeaders<RowDataType>
     );
 
     return headers;
   }
 
-  public sortByColumn<SortKey extends keyof z.infer<SchemaType>>(
+  public sortByColumn<SortKey extends keyof RowDataType>(
     columnKey: SortKey,
     direction: "asc" | "desc"
   ) {
@@ -148,6 +137,6 @@ export class Table<SchemaType extends z.ZodType<any, any>> {
       return 0;
     });
 
-    return new Table<SchemaType>(this.schema, sortedRows, this.columns);
+    return new Table<RowDataType>(sortedRows, this.columns);
   }
 }
