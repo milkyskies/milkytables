@@ -1,5 +1,4 @@
-import { z } from "zod";
-import type { Row } from "./row.js";
+import type { Row, RowData } from "./row.js";
 
 type TableColumn<RowDataType, LayoutType> = {
   key: keyof RowDataType;
@@ -11,26 +10,22 @@ export type TableHeaders<RowDataType> = {
   [Property in keyof RowDataType]: string;
 };
 
-export class Table<SchemaType extends z.ZodType<any, any>, LayoutType = any> {
-  private readonly rows: Row<z.infer<SchemaType>>[];
-  private readonly columns: TableColumn<z.infer<SchemaType>, LayoutType>[];
-  private readonly schema: SchemaType;
+export class Table<RowDataType extends RowData, LayoutType = any> {
+  private readonly rows: Row<RowDataType>[];
+  private readonly columns: TableColumn<RowDataType, LayoutType>[];
 
   constructor(
-    schema: SchemaType,
-    rows: Row<z.infer<SchemaType>>[] = [],
-    columns: TableColumn<z.infer<SchemaType>, LayoutType>[] = []
+    rows: Row<RowDataType>[] = [],
+    columns: TableColumn<RowDataType, LayoutType>[] = []
   ) {
-    this.schema = schema;
     this.rows = rows;
     this.columns = columns;
   }
 
   public static create<
-    SchemaType extends z.ZodType<any, any>,
+    SchemaType extends z.ZodType<any, any>
     LayoutType = any
   >({
-    schema,
     columns = [],
     rows = [],
   }: {

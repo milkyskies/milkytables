@@ -1,0 +1,39 @@
+{
+  "name": "milkytables-react",
+  "version": "0.3.16",
+  "author": "milkyskies",
+  "keywords": [
+    "tables",
+    "table",
+    "react"
+  ],
+  "description": "React tables",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js",
+      "types": "./dist/types/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "npm run build:cjs && npm run build:esm && npm run build:types",
+    "build:cjs": "tsc --module commonjs --outDir dist/cjs",
+    "build:esm": "tsc --module esnext --outDir dist/esm",
+    "build:types": "tsc --declaration --declarationDir dist/types --emitDeclarationOnly"
+  },
+  "license": "ISC",
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "tslib": "^2.6.2",
+    "typescript": "^5.4.5"
+  },
+  "dependencies": {
+    "milkytables": "^0.1.4"
+  }
+}
