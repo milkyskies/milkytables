@@ -21,7 +21,7 @@ function test() {
       {
         key: "name",
         label: "Name",
-        cellLayout: (cellData) => cellData.value,
+        cellLayout: (data) => data.value as string,
       },
       {
         key: "age",

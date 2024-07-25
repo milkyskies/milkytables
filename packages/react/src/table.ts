@@ -7,7 +7,7 @@ type TableColumn<RowDataType> = {
   cellLayout?: CellLayout<RowDataType[keyof RowDataType]>;
 };
 
-type CellLayout<T> = React.ComponentType<{ cellData: T }>;
+type CellLayout<T> = React.ComponentType<{ value: T }>;
 
 export type TableHeaders<RowDataType> = {
   [Property in keyof RowDataType]: string | ReactNode;
