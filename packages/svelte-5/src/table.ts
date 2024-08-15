@@ -141,4 +141,8 @@ export class Table<RowDataType extends RowData> {
 
     return new Table<RowDataType>(sortedRows, this.columns);
   }
+
+  public asGenericTable(): Table<RowData> {
+    return this as unknown as Table<RowData>;
+  }
 }
