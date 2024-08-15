@@ -1,11 +1,14 @@
+import type { Snippet } from "svelte";
 import { type Row, type RowData } from "./row.js";
-import type { ComponentType, SvelteComponent } from "svelte";
 
 type TableColumn<RowDataType> = {
   key: keyof RowDataType;
   label: string;
-  cellLayout?: ComponentType<SvelteComponent<{ cellData: { data: any } }>>;
+  cellLayout?: CellLayout<RowDataType[keyof RowDataType]>;
+  labelLayout?: CellLayout<string>;
 };
+
+type CellLayout<T> = Snippet<[value: T]>;
 
 export type TableHeaders<RowDataType> = {
   [Property in keyof RowDataType]: string;
@@ -81,9 +84,8 @@ export class Table<RowDataType extends RowData> {
     type RowsType = {
       [Property in Keys]: {
         value: RowDataType[Property];
-        cellLayout?: ComponentType<
-          SvelteComponent<{ cellData: { data: RowDataType } }>
-        >;
+        cellLayout?: CellLayout<RowDataType[Property]>;
+        labelLayout?: Snippet<[string]>;
       };
     }[];
 
@@ -91,9 +93,8 @@ export class Table<RowDataType extends RowData> {
       const rowData: {
         [Property in Keys]: {
           value: RowDataType[Property];
-          cellLayout?: ComponentType<
-            SvelteComponent<{ cellData: { data: RowDataType } }>
-          >;
+          cellLayout?: CellLayout<RowDataType[Property]>;
+          labelLayout?: Snippet<[string]>;
         };
       } = {} as any;
 
@@ -101,6 +102,7 @@ export class Table<RowDataType extends RowData> {
         rowData[column.key as Keys] = {
           value: row.value[column.key as Keys],
           cellLayout: column.cellLayout,
+          labelLayout: column.labelLayout,
         } as any; // Using 'as any' to bypass the strict type checking
       });
 

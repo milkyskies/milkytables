@@ -1,4 +1,6 @@
-export type RowData = Record<string, any>;
+export type RowData = {
+  [key: string]: any;
+};
 
 export type Column<RowDataType> = {
   key: keyof RowDataType;
